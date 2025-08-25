@@ -1,128 +1,51 @@
-import React, { useState } from 'react';
 import '../../styles/userProfile/Signup.css';
-import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { setToken } from './session';
 
-function SignUp() {
-  const navigate = useNavigate();
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [age, setAge] = useState('');
-  const [acceptedTerms, setAcceptedTerms] = useState(true);
+export default function Signup() {
+  const nav = useNavigate();
+  const [form, setForm] = useState({ name: '', email: '', password: '' });
+  const [err, setErr] = useState('');
 
-  const handleSubmit = async (e) => {
+  async function submit(e) {
     e.preventDefault();
-
-    const payload = {
-      name,
-      email,
-      password,
-      age: parseInt(age),
-      acceptedTerms,
-    };
-
+    setErr('');
     try {
-      let body = '';
-      console.log('try to register');
-      const response = await fetch('https://juvoproject.com/api/users/register', {
+      const r = await fetch('https://juvoproject.com/api/users/register', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form)
       });
-      console.log('payload', body);
-      console.log('response', response);
-      console.log('response status', response.status);
-
-      const result = await response.text();
-      if (response.ok) {
-        alert('Registration successful! ✅');
-        console.log(result);
-        // Redirect to login page after successful signup
-        navigate('/login');
-      } else {
-        alert(`Registration failed: ${result} ❌`);
-        console.error(result);
-      }
-    } catch (err) {
-      console.error('Error registering user:', err);
-    }
-  };
+      const data = await r.json();
+      if (!r.ok) throw new Error(data?.message || 'Sign up failed');
+      if (data?.token) setToken(data.token);
+      nav('/profile');
+    } catch (ex) { setErr(ex.message); }
+  }
 
   return (
-    <div className="signup-container">
-      <form className="signup-form" onSubmit={handleSubmit}>
-        <h2>Create Account</h2>
-
-        <div className="form-group">
-          <label htmlFor="name">Full Name</label>
-          <input
-            type="text"
-            id="name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Enter your full name"
-            required
-          />
+    <div className="auth-wrap">
+      <form className="card auth" onSubmit={submit}>
+        <h3>Create your account</h3>
+        <div className="stack">
+          <div>
+            <label>Name</label>
+            <input className="input" value={form.name} onChange={e=>setForm({...form, name:e.target.value})} />
+          </div>
+          <div>
+            <label>Email</label>
+            <input className="input" value={form.email} onChange={e=>setForm({...form, email:e.target.value})} />
+          </div>
+          <div>
+            <label>Password</label>
+            <input className="input" type="password" value={form.password} onChange={e=>setForm({...form, password:e.target.value})} />
+          </div>
+          {err && <div className="auth-error">{err}</div>}
+          <button className="btn" type="submit">Sign up</button>
+          <div className="auth-alt">Already have an account? <Link to="/login">Log in</Link></div>
         </div>
-
-        <div className="form-group">
-          <label htmlFor="email">Email</label>
-          <input
-            type="email"
-            id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Enter your email"
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="password">Password</label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Enter your password"
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="age">Age</label>
-          <input
-            type="number"
-            id="age"
-            value={age}
-            onChange={(e) => setAge(e.target.value)}
-            placeholder="Enter your age"
-            min="18"
-            required
-            onInvalid={(e) => e.target.setCustomValidity('You must be at least 18 years old to register.')}
-            onInput={(e) => e.target.setCustomValidity('')}
-          />
-        </div>
-
-        {/* New checkbox for acceptedTerms */}
-        <div className="form-group" style={{ marginTop: '15px' }}>
-          <input
-            className="termsCheckbox"
-            type="checkbox"
-            id="terms"
-            checked={acceptedTerms}
-            onChange={(e) => setAcceptedTerms(e.target.checked)}
-            required
-          />
-          I agree to the Terms and Conditions
-        </div>
-
-        <button className="submit-signup-btn">Sign Up</button>
       </form>
     </div>
   );
-};
-
-export default SignUp;
+}

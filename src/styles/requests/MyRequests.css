@@ -1,6 +1,1 @@
-.my-requests-content {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  margin: 20px 0;
-}
+/* layout driven by global .stack spacing */

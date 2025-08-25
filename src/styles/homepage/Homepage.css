@@ -1,6 +1,12 @@
-.homepage {
-  position: relative;
-  width: 100vw;
-  height: 100vh;
-  background-color: #f5e9e2;
+.homepage { display: grid; gap: 16px; }
+.section-head { display: flex; align-items: baseline; gap: 10px; padding: 16px 16px 0; }
+.section-head h3 { margin: 0; }
+.picks { overflow: hidden; }
+.picks-row {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(210px, 1fr);
+  gap: 12px;
+  padding: 12px 16px 18px;
+  overflow-x: auto;
 }

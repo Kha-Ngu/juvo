@@ -1,71 +1,55 @@
 import '../../styles/requests/Requests.css';
 import Thumbnail from './Thumbnail';
 import { getUserIdFromToken } from '../../utility/AuthUtil';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
-function Requests({ header, endpoint, toggleable = false, isMine = false }) {
+export default function Requests({ header, endpoint, toggleable = false, isMine = false }) {
   const [requests, setRequests] = useState([]);
   const [visible, setVisible] = useState(true);
   const userId = getUserIdFromToken();
 
-  const fetchRequests = async () => {
-    try {
-      const response = await fetch(endpoint);
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-      const data = await response.json();
-
-      const filteredRequests = isMine
-        ? data
-        : data.filter(req => req.userId !== userId && req.isActive);
-
-      const mappedRequests = filteredRequests.map(req => ({
-        id: req.id,
-        imageUrl: req.imageUrl,
-        title: req.title
-      }));
-
-      setRequests(mappedRequests);
-    } catch (error) {
-      console.error("Error fetching requests:", error);
-    }
-  };
-
   useEffect(() => {
-    fetchRequests();
-  }, [userId, isMine, endpoint]);
-
-  const handleToggle = () => {
-    setVisible(prev => !prev);
-  };
+    let stop = false;
+    async function run() {
+      try {
+        const r = await fetch(endpoint);
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        const data = await r.json();
+        if (!stop) setRequests(Array.isArray(data) ? data : (data?.content || []));
+      } catch (e) {
+        console.error(e);
+        if (!stop) setRequests([]);
+      }
+    }
+    run();
+    return () => { stop = true; };
+  }, [endpoint]);
 
   return (
-    <div className="requests-container">
-      <div className="requests-header" onClick={toggleable ? handleToggle : undefined}>
-        <h2>{header}</h2>
+    <section className="card">
+      <div className="req-head">
+        <h3>{header}</h3>
         {toggleable && (
-          <i
-            className={`fa-solid fa-caret-${visible ? 'down' : 'right'}`}
-            style={{ cursor: 'pointer', marginLeft: '10px' }}
-          ></i>
+          <button className="btn btn-secondary" onClick={() => setVisible(v => !v)}>
+            {visible ? 'Hide' : 'Show'}
+          </button>
         )}
       </div>
 
       {visible && (
-        <div className="requests-grid">
+        <div className="req-grid">
           {requests.map(item => (
             <Thumbnail
+              key={item.id}
               requestId={item.id}
               image={item.imageUrl}
               title={item.title}
-              isMine={isMine}
+              isMine={isMine && userId === item.userId}
             />
           ))}
+          {requests.length === 0 && <div className="subtitle" style={{ padding: 10 }}>No requests found.</div>}
         </div>
       )}
-    </div>
+    </section>
   );
 }
-
-export default Requests;

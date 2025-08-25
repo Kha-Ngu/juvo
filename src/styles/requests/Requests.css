@@ -1,43 +1,6 @@
-body, html {
-  margin: 0;
-  padding: 0;
-  overflow-x: hidden;
-}
-
-.requests-container {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  color: #1b0e14;
-  font-family: Georgia, 'Times New Roman', Times, serif;
-  background-color: #f5e9e2;
-  padding: 0 20px;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.requests-container h2 {
-  margin-bottom: 20px;
-}
-
-.requests-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.loading {
-  margin: 20px 0;
-  font-size: 18px;
-  color: #888;
-}
-
-.requests-header {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-}
-.requests-header h2 {
-  margin: 0;
-}
+.req-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; }
+.req-head h3 { margin: 0; }
+.req-grid { display: grid; gap: 16px; padding: 0 16px 16px; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+@media (max-width: 1000px) { .req-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 720px)  { .req-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 520px)  { .req-grid { grid-template-columns: 1fr; } }
